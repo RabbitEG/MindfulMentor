@@ -31,19 +31,39 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 - 编排（Orchestrator）：把多个内部服务串成业务流程，并做安全校验、错误包装。
 - TraceId：每个请求的唯一标识，便于日志/链路排查。
 
-## 架构与流程
+## 架构图（模块关系）
 ```mermaid
 flowchart LR
-  FE["FrontEnd<br/>(Streamlit)"] -->|HTTP /chat etc.| ORC["Orchestrator<br/>(FastAPI)"]
-  ORC -->|safety check| SAFE["Safety<br/>规则/阻断"]
-  ORC -->|情绪分析| EMO["EmotionService<br/>/analyze"]
-  EMO --> ORC
-  ORC -->|组装提示| PROMPT["PromptEngine<br/>/prompt"]
-  PROMPT --> ORC
-  ORC -->|生成回复| LLM["LlmGateway<br/>/generate"]
-  LLM --> ORC
-  ORC -->|reply + meta + traceId| FE
-  ORC -->|辅助流程| EX["呼吸/思维澄清<br/>静态内容"]
+  FE["FrontEnd<br/>Streamlit UI"] --> ORC["Orchestrator<br/>FastAPI"]
+  ORC --> EMO["EmotionService<br/>情绪识别"]
+  ORC --> PROMPT["PromptEngine<br/>提示生成"]
+  ORC --> LLM["LlmGateway<br/>模型网关"]
+  ORC --> SAFE["Safety<br/>规则/阻断"]
+  ORC --> EX["练习内容<br/>呼吸/澄清"]
+```
+
+## 流程图（数据流转）
+```mermaid
+sequenceDiagram
+  participant User as 用户
+  participant FE as 前端
+  participant ORC as Orchestrator
+  participant EMO as EmotionService
+  participant P as PromptEngine
+  participant G as LlmGateway
+
+  User->>FE: 输入情绪文本
+  FE->>ORC: /chat 请求 (text)
+  ORC->>SAFE: 安全检查
+  SAFE-->>ORC: 允许/阻断结果
+  ORC->>EMO: 分析情绪
+  EMO-->>ORC: {emotion, intensity, scores}
+  ORC->>P: 构建 Prompt（含情绪/强度/traceId）
+  P-->>ORC: {prompt, mode, llmParams, meta}
+  ORC->>G: 调用模型生成回复
+  G-->>ORC: {text, provider, usage}
+  ORC-->>FE: {reply, emotion, mode, meta, traceId}
+  FE-->>User: 展示回复、情绪分布、建议练习
 ```
 
 ## 设计要点
