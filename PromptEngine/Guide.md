@@ -7,7 +7,8 @@
   - 模板渲染：把情绪、强度等变量填入预设模板（Normal/HighIntensity）。
   - 安全模式（mode）：high_safety 用更温和、限制性的提示；normal 为常规提示。
   - FastAPI/Pydantic：框架与数据校验基础。
-- 环境配置：Python 3.10+；`pip install -r Requirements.txt`；启动 `uvicorn App:app --reload --port 8002`。
+- 环境配置：Python 3.10+；Linux 进入目录后 `python3 -m venv .venv && source .venv/bin/activate && pip install -r Requirements.txt`。
+- 启动：激活 `.venv` 后可直接 `python App.py`（已内置 `uvicorn.run`，默认 `reload=True`），或使用 `uvicorn App:app --reload --port 8002`。
 - 主要任务：
   - `/prompt`：输入 `{text, emotion, intensity, context}`，输出 `{prompt, mode, llmParams, meta}`。
   - 维护模板文件，确保高强度情绪使用更安全的措辞。
