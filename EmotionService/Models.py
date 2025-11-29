@@ -6,10 +6,9 @@ class EmotionRequest(BaseModel):
 
 
 class EmotionResult(BaseModel):
-    label: str = Field(..., description="Coarse sentiment label")
-    intensity: str = Field(..., description="low|medium|high")
-    score: float = Field(..., ge=0.0, le=1.0, description="Confidence score for dominant label")
-    dominant_emotions: list[str] = Field(default_factory=list, description="Top emotions detected")
+    emotion: str = Field(..., description="anxious|angry|sad|tired|neutral")
+    intensity: int = Field(..., ge=1, le=3, description="Discrete intensity level 1-3")
+    scores: dict[str, float] = Field(default_factory=dict, description="Per-emotion probability scores")
 
 
 class EmotionResponse(BaseModel):

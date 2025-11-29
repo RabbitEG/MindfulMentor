@@ -1,59 +1,44 @@
 from __future__ import annotations
 
-import math
 from typing import Dict, List
+
+from transformers import pipeline
 
 from Models import EmotionResult
 
-
-POSITIVE_KEYWORDS = ["great", "good", "happy", "joy", "love", "excited"]
-NEGATIVE_KEYWORDS = ["bad", "sad", "angry", "upset", "anxious", "fear"]
-HIGH_INTENSITY_WORDS = ["furious", "panic", "terrified", "ecstatic", "devastated"]
+EMOTION_LABELS: List[str] = ["anxious", "angry", "sad", "tired", "neutral"]
 
 
-def _keyword_score(text: str, keywords: List[str]) -> int:
-    lowered = text.lower()
-    return sum(1 for kw in keywords if kw in lowered)
+_classifier = pipeline(
+    "zero-shot-classification",
+    model="facebook/bart-large-mnli",
+)
+
+
+def _scores_to_intensity(max_score: float) -> int:
+    """
+    Map confidence to discrete intensity (1-3).
+    """
+    if max_score >= 0.66:
+        return 3
+    if max_score >= 0.33:
+        return 2
+    return 1
 
 
 def analyze_text(text: str) -> EmotionResult:
     """
-    Lightweight rule-based fallback emotion detector.
-    Replace with a HF model call later.
+    Use HF zero-shot classification to map text into predefined emotion labels.
     """
-    pos_score = _keyword_score(text, POSITIVE_KEYWORDS)
-    neg_score = _keyword_score(text, NEGATIVE_KEYWORDS)
-    high_intensity = _keyword_score(text, HIGH_INTENSITY_WORDS)
+    result = _classifier(text, candidate_labels=EMOTION_LABELS, multi_label=True)
+    label_scores: Dict[str, float] = {label: 0.0 for label in EMOTION_LABELS}
 
-    if pos_score > neg_score:
-        label = "positive"
-        score = pos_score / max(pos_score + neg_score, 1)
-    elif neg_score > pos_score:
-        label = "negative"
-        score = neg_score / max(pos_score + neg_score, 1)
-    elif pos_score == neg_score == 0:
-        label = "neutral"
-        score = 0.5
-    else:
-        label = "mixed"
-        score = 0.5
+    for label, score in zip(result["labels"], result["scores"]):
+        if label in label_scores:
+            label_scores[label] = float(score)
 
-    intensity_value = "low"
-    if high_intensity > 0 or max(pos_score, neg_score) >= 2:
-        intensity_value = "high"
-    elif max(pos_score, neg_score) == 1:
-        intensity_value = "medium"
+    # normalize to top-1 dominant emotion
+    dominant = max(label_scores.items(), key=lambda kv: kv[1])
+    intensity = _scores_to_intensity(dominant[1])
 
-    dominant_emotions: Dict[str, float] = {}
-    if label == "positive":
-        dominant_emotions["joy"] = score
-    elif label == "negative":
-        dominant_emotions["anger"] = score
-
-    normalized_score = float(min(1.0, math.ceil(score * 100) / 100))
-    return EmotionResult(
-        label=label,
-        intensity=intensity_value,
-        score=normalized_score,
-        dominant_emotions=list(dominant_emotions.keys()),
-    )
+    return EmotionResult(emotion=dominant[0], intensity=intensity, scores=label_scores)
