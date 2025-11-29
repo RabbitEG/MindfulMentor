@@ -23,6 +23,14 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   ```
   日志位于 `.logs/`。
 
+## 名词速览
+- 情绪识别：把输入文本映射为预设情绪标签（如 anxious/angry）及强度。
+- Prompt：发给大模型的指令文本，通常包含角色、语气、限制等。
+- Provider：大模型服务提供方或实现（OpenAI、DeepSeek、本地模型、mock）。
+- Gateway：对不同 Provider 做统一封装/回退，让上游不关心底层差异。
+- 编排（Orchestrator）：把多个内部服务串成业务流程，并做安全校验、错误包装。
+- TraceId：每个请求的唯一标识，便于日志/链路排查。
+
 ## 设计要点
 - 强解耦：各模块都能独立作为服务运行，Orchestrator 可通过 import 或 HTTP 方式编排。
 - 安全第一：PromptEngine 对高强度情绪使用更温和的提示，Safety 模块做硬规则检测。
@@ -35,10 +43,36 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 - Orchestrator `/chat` `/breathing` `/thought-clarify`：统一给前端使用。
 
 更多契约与调用链见 `Docs/Interfaces.md` 与 `Docs/Arch.md`。
+各子模块（EmotionService / PromptEngine / LlmGateway / Orchestrator / FrontEnd）都有各自的 `README.md`，详细说明职责、名词和接口。
 
 ## 协作 / 提交须知
-- 仓库：https://github.com/RabbitEG/MindfulMentor
-- 提交前先拉取主分支并解决冲突：`git pull --rebase`
-- 避免在主分支直接开发，建议自建分支并通过 PR 合并；提交信息保持简洁明了。
-- 提交前跑一遍 `./scripts/StartAll.sh` 确保依赖可装、服务可起，必要时附带关键日志说明。
-- 推送前清理临时文件与敏感信息（如本地模型路径、API Key 等）。
+仓库：https://github.com/RabbitEG/MindfulMentor
+
+推荐协作步骤：
+1) 克隆并进入仓库  
+   ```bash
+   git clone https://github.com/RabbitEG/MindfulMentor.git
+   cd MindfulMentor
+   ```
+2) 创建个人功能分支  
+   ```bash
+   git checkout -b feature/<你的名字>-<改动名>
+   ```
+3) 开发前先同步主分支，减少后续冲突  
+   ```bash
+   git pull --rebase origin main
+   ```
+4) 开发与自测：按需运行 `./scripts/StartAll.sh`，确保依赖可装、服务可起。
+5) 提交代码  
+   ```bash
+   git add .
+   git commit -m "说明一下你改了啥"
+   ```
+6) 如开发时间较长或 push 提示落后，可在推送前再同步一次主分支  
+   ```bash
+   git pull --rebase origin main
+   ```
+7) 推送并发起 PR（主分支避免直接开发），推送前确认无敏感信息/临时文件；推荐至少每日或每个里程碑推送一次，避免积累过多改动  
+   ```bash
+   git push -u origin feature/<你的名字>-<改动名>
+   ```

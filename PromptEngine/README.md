@@ -1,5 +1,11 @@
 PromptEngine 负责根据情绪与上下文构建安全的 LLM Prompt，并决定高/常规模式的参数。
 
+## 名词解释
+- Prompt：发给大模型的指令文本，通常包含角色设定、语气、回复格式和限制条件。
+- 模板（Template）：带占位符的 Prompt 样板，根据情绪/强度等变量动态填充。
+- 模式（mode）：`high_safety` 表示更温和、受限的提示；`normal` 为常规提示。
+- LLM 参数（llmParams）：调用大模型时的超参，如 `temperature`、`max_tokens`。
+
 ## 职责与结构
 - `Core.py`：读取模板（`Templates/`），根据 `PromptRequest` 生成 `PromptResponse`，包含 mode、llmParams、meta。
 - `Models.py`：定义请求/响应数据结构，约束强度范围等。
