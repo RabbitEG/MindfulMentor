@@ -1,4 +1,10 @@
-MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示例项目。目录拆分为：情绪识别（EmotionService）、提示组装（PromptEngine）、LLM 网关（LlmGateway）、编排层（Orchestrator）、Streamlit 前端（FrontEnd）。
+MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示例项目。
+
+## Introduction
+- 目标：让用户输入情绪相关的文本，获得安全、共情的回应，并附带可视化的情绪分析与建议练习。
+- 价值：验证情绪识别 + 提示安全策略 + 多 Provider 网关的组合方式，便于后续接入真实 LLM 或扩展安全策略。
+- 组成：情绪识别（EmotionService）、提示组装（PromptEngine）、LLM 网关（LlmGateway）、编排层（Orchestrator）、前端展示（FrontEnd）。
+- 使用场景示例：压力/焦虑的自助对话、呼吸引导、思维澄清辅助，附 traceId 便于调试与审计。
 
 ## 快速开始
 - 前置：Python 3.10+，建议保持网络可下载依赖与模型。
