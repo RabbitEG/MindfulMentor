@@ -1,19 +1,27 @@
-MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示例项目。目录拆分为情绪识别、提示组装、LLM 网关、编排层，以及 Streamlit 前端，方便独立运行与组合。
+MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示例项目。目录拆分为：情绪识别（EmotionService）、提示组装（PromptEngine）、LLM 网关（LlmGateway）、编排层（Orchestrator）、Streamlit 前端（FrontEnd）。
 
-## 快速开始（Linux）
-- Python 3.10+。建议每个子模块在本地单独 `.venv`，进入模块目录后执行：
+## 快速开始
+- 前置：Python 3.10+，建议保持网络可下载依赖与模型。
+- 首次需要创建虚拟环境（StartAll 会自动激活但不会新建）：
   ```bash
+  cd path/to/MindfulMentor
   python3 -m venv .venv
-  source .venv/bin/activate
-  pip install -r Requirements.txt
   ```
-  用完 `deactivate` 退出，其他模块同理。
-- 启动顺序（可按需局部运行；先激活对应模块的 `.venv`）：
-  1) EmotionService：`cd EmotionService && source .venv/bin/activate && python App.py`（等价于 `uvicorn App:app --reload --port 8001`）
-  2) PromptEngine：`cd PromptEngine && source .venv/bin/activate && python App.py`（等价于 `uvicorn App:app --reload --port 8002`）
-  3) LlmGateway：`cd LlmGateway && source .venv/bin/activate && python App.py`（等价于 `uvicorn App:app --reload --port 8004`）
-  4) Orchestrator：`cd Orchestrator && source .venv/bin/activate && python App.py`（等价于 `uvicorn App:app --reload --port 8003`）
-  5) 前端：`cd FrontEnd && source .venv/bin/activate && streamlit run App.py`
+- 运行前激活虚拟环境，终端前缀应看到 `(.venv)`：
+  ```bash
+  source .venv/bin/activate
+  ```
+- 一键启动（包含依赖安装与端口准备）：
+  ```bash
+  cd path/to/MindfulMentor
+  ./scripts/StartAll.sh
+  ```
+  启动成功后浏览器访问 `http://127.0.0.1:8501`。
+- 每次跑完后建议清理环境与端口：
+  ```bash
+  ./scripts/ClearEnv.sh
+  ```
+  日志位于 `.logs/`。
 
 ## 设计要点
 - 强解耦：各模块都能独立作为服务运行，Orchestrator 可通过 import 或 HTTP 方式编排。
@@ -27,3 +35,10 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 - Orchestrator `/chat` `/breathing` `/thought-clarify`：统一给前端使用。
 
 更多契约与调用链见 `Docs/Interfaces.md` 与 `Docs/Arch.md`。
+
+## 协作 / 提交须知
+- 仓库：https://github.com/RabbitEG/MindfulMentor
+- 提交前先拉取主分支并解决冲突：`git pull --rebase`
+- 避免在主分支直接开发，建议自建分支并通过 PR 合并；提交信息保持简洁明了。
+- 提交前跑一遍 `./scripts/StartAll.sh` 确保依赖可装、服务可起，必要时附带关键日志说明。
+- 推送前清理临时文件与敏感信息（如本地模型路径、API Key 等）。

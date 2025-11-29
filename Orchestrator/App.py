@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from Flows import breathing_flow, chat_flow, thought_clarify_flow
-from Models import ChatRequest, OrchestratorResponse
+from .Flows import breathing_flow, chat_flow, thought_clarify_flow
+from .Models import ChatRequest, OrchestratorResponse
 
 app = FastAPI(title="Orchestrator", version="0.1.0")
 
@@ -32,4 +32,4 @@ def health():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("App:app", host="0.0.0.0", port=8003, reload=True)
+    uvicorn.run("Orchestrator.App:app", host="0.0.0.0", port=8003, reload=True)

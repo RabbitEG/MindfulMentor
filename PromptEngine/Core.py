@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Tuple
 
-from Models import PromptRequest, PromptResponse
+from .Models import PromptRequest, PromptResponse
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "Templates"

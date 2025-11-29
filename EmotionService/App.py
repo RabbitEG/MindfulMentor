@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from Core import analyze_text
-from Models import EmotionRequest, EmotionResponse
+from .Core import analyze_text
+from .Models import EmotionRequest, EmotionResponse
 
 app = FastAPI(title="EmotionService", version="0.1.0")
 
@@ -20,4 +20,4 @@ def health():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("App:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("EmotionService.App:app", host="0.0.0.0", port=8001, reload=True)

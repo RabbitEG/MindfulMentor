@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from Core import build_prompt
-from Models import PromptRequest, PromptResponse
+from .Core import build_prompt
+from .Models import PromptRequest, PromptResponse
 
 app = FastAPI(title="PromptEngine", version="0.1.0")
 
@@ -19,4 +19,4 @@ def health():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("App:app", host="0.0.0.0", port=8002, reload=True)
+    uvicorn.run("PromptEngine.App:app", host="0.0.0.0", port=8002, reload=True)

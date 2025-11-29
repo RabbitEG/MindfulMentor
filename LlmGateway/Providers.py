@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 
 import httpx
 
-from Config import LlmConfig
+from .Config import LlmConfig
 
 
 class ProviderError(RuntimeError):

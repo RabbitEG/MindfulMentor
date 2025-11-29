@@ -12,27 +12,22 @@ if str(PARENT_DIR) not in sys.path:
     sys.path.append(str(PARENT_DIR))
 
 from EmotionService.Core import analyze_text
-from EmotionService.Models import EmotionResult
 from LlmGateway.Core import generate_text
 from LlmGateway.Models import GenerateRequest
 from PromptEngine.Core import build_prompt
 from PromptEngine.Models import PromptRequest
-from Safety import hard_stop_message, is_safe
+from .Safety import hard_stop_message, is_safe
 
 
 def _new_trace_id() -> str:
     return str(uuid.uuid4())
 
 
-def _intensity_to_mode(intensity: int) -> str:
-    return "high" if intensity >= 3 else "normal"
-
-
-def _emotion_payload(emotion: EmotionResult, intensity_label: str) -> Dict[str, Any]:
+def _emotion_payload(emotion) -> Dict[str, Any]:
     dominant_score = float(emotion.scores.get(emotion.emotion, 0.0))
     return {
         "label": emotion.emotion,
-        "intensity": intensity_label,
+        "intensity": emotion.intensity,
         "score": dominant_score,
         "scores": emotion.scores,
     }
@@ -68,20 +63,18 @@ def chat_flow(text: str) -> Dict[str, Any]:
 
     try:
         emotion = analyze_text(text)
-        intensity_label = _intensity_to_mode(emotion.intensity)
-        mode = "high_safety" if intensity_label == "high" else "normal"
-
         prompt = build_prompt(
             PromptRequest(
-                label=emotion.emotion,
-                intensity=intensity_label,
-                user_text=text,
+                text=text,
+                emotion=emotion.emotion,
+                intensity=emotion.intensity,
                 context={"traceId": trace_id},
             )
         )
+        mode = prompt.mode
         llm_response = generate_text(GenerateRequest(prompt=prompt.prompt))
 
-        suggested = "breathing" if intensity_label == "high" else "thought_log"
+        suggested = "breathing" if mode == "high_safety" else "thought_log"
         return {
             "message": llm_response.text,
             "reply": llm_response.text,
@@ -90,11 +83,12 @@ def chat_flow(text: str) -> Dict[str, Any]:
             "meta": {
                 **base_meta,
                 "template": prompt.meta.get("template", "unknown"),
+                "llmParams": prompt.llmParams,
                 "llm_provider": llm_response.provider,
                 "usage": llm_response.usage,
                 "suggestedExercise": suggested,
             },
-            "emotion": _emotion_payload(emotion, intensity_label),
+            "emotion": _emotion_payload(emotion),
             "suggestedExercise": suggested,
         }
     except Exception as exc:

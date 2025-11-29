@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from Models import GenerateRequest, GenerateResponse
-from Config import load_config
-from Providers import BaseProvider, MockProvider, ProviderError, get_provider
+from .Models import GenerateRequest, GenerateResponse
+from .Config import load_config
+from .Providers import BaseProvider, MockProvider, ProviderError, get_provider
 
 
 def generate_text(request: GenerateRequest) -> GenerateResponse:

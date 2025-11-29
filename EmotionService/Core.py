@@ -1,17 +1,49 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Dict, List
 
+from huggingface_hub import snapshot_download
 from transformers import pipeline
 
-from Models import EmotionResult
+from EmotionService.Models import EmotionResult
 
 EMOTION_LABELS: List[str] = ["anxious", "angry", "sad", "tired", "neutral"]
+MODEL_ID = "facebook/bart-large-mnli"
+DEFAULT_MODEL_DIR = Path(__file__).resolve().parent / ".models" / MODEL_ID.replace("/", "--")
+
+def _resolve_model_dir() -> Path:
+    """
+    Locate a locally cached HF model without hitting the network.
+    """
+    configured_dir = Path(os.environ.get("EMOTION_MODEL_DIR", DEFAULT_MODEL_DIR))
+
+    if configured_dir.exists():
+        return configured_dir
+
+    # If the model was downloaded to the default HF cache, reuse it.
+    try:
+        cached = Path(
+            snapshot_download(
+                repo_id=MODEL_ID,
+                local_files_only=True,
+            )
+        )
+        return cached
+    except Exception as exc:  # pragma: no cover - fail fast with hint
+        raise RuntimeError(
+            f"Model not found at {configured_dir}. "
+            "Run `python download_models.py` (or set EMOTION_MODEL_DIR to a pre-downloaded path)."
+        ) from exc
 
 
+_MODEL_DIR = _resolve_model_dir()
 _classifier = pipeline(
     "zero-shot-classification",
-    model="facebook/bart-large-mnli",
+    model=str(_MODEL_DIR),
+    tokenizer=str(_MODEL_DIR),
+    local_files_only=True,
 )
 
 

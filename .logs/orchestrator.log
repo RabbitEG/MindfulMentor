@@ -1,0 +1,7 @@
+INFO:     Will watch for changes in these directories: ['/home/rabbi/MindfulMentor']
+INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
+INFO:     Started reloader process [56634] using WatchFiles
+INFO:     Started server process [56717]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:40308 - "POST /chat HTTP/1.1" 200 OK
