@@ -31,6 +31,21 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 - 编排（Orchestrator）：把多个内部服务串成业务流程，并做安全校验、错误包装。
 - TraceId：每个请求的唯一标识，便于日志/链路排查。
 
+## 架构与流程
+```mermaid
+flowchart LR
+  FE["FrontEnd<br/>(Streamlit)"] -->|HTTP /chat etc.| ORC["Orchestrator<br/>(FastAPI)"]
+  ORC -->|safety check| SAFE["Safety<br/>规则/阻断"]
+  ORC -->|情绪分析| EMO["EmotionService<br/>/analyze"]
+  EMO --> ORC
+  ORC -->|组装提示| PROMPT["PromptEngine<br/>/prompt"]
+  PROMPT --> ORC
+  ORC -->|生成回复| LLM["LlmGateway<br/>/generate"]
+  LLM --> ORC
+  ORC -->|reply + meta + traceId| FE
+  ORC -->|辅助流程| EX["呼吸/思维澄清<br/>静态内容"]
+```
+
 ## 设计要点
 - 强解耦：各模块都能独立作为服务运行，Orchestrator 可通过 import 或 HTTP 方式编排。
 - 安全第一：PromptEngine 对高强度情绪使用更温和的提示，Safety 模块做硬规则检测。
