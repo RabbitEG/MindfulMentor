@@ -13,3 +13,9 @@
   - `/generate`：输入 `{prompt, params, provider}`，输出 `{text, provider, usage}`。
   - 实现对不同 provider 的分发与错误处理；保留 mock 模式便于离线调试。
   - 记录并返回 usage 统计，方便上层观测。
+
+### Provider 配置
+- 默认 `LLM_PROVIDER=tiny-local` 使用超小 `sshleifer/tiny-gpt2`，离线可跑；缺少依赖时自动回退到 `mock`。
+- 使用本地其他模型：设置 `LLM_LOCAL_MODEL=<hf model id>`，或请求体中带 `provider: "tiny-local"` + `max_tokens`。
+- 走 API（OpenAI/DeepSeek 等兼容接口）：`LLM_PROVIDER=openai`，并配置 `LLM_API_KEY`, `LLM_BASE_URL`（可选），`LLM_API_MODEL`（默认 `gpt-3.5-turbo`）。
+- 手动 mock：`LLM_PROVIDER=mock` 或请求体 `provider: "mock"`。
