@@ -5,8 +5,13 @@ from Config import ORCHESTRATOR_BASE
 def call_orchestrator(endpoint: str, payload: dict) -> dict:
     """Send a JSON payload to the orchestrator and normalize errors for the UI."""
     url = f"{ORCHESTRATOR_BASE}{endpoint}"
+    # Disable proxy for localhost/internal service calls to avoid 502 Bad Gateway
+    proxies = {
+        "http": None,
+        "https": None,
+    }
     try:
-        resp = requests.post(url, json=payload, timeout=10)
+        resp = requests.post(url, json=payload, timeout=10, proxies=proxies)
         resp.raise_for_status()
         data = resp.json()
     except requests.exceptions.Timeout:
