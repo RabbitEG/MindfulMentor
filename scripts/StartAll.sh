@@ -22,12 +22,8 @@ source "${VENV}/bin/activate" || {
     exit 1
 }
 
-echo ">>> Installing requirements for all modules..."
-pip install -r "${ROOT}/EmotionService/Requirements.txt" \
-             -r "${ROOT}/PromptEngine/Requirements.txt" \
-             -r "${ROOT}/LlmGateway/Requirements.txt" \
-             -r "${ROOT}/Orchestrator/Requirements.txt" \
-             -r "${ROOT}/FrontEnd/Requirements.txt"
+echo ">>> Installing unified requirements..."
+pip install -r "${ROOT}/requirements.txt"
 
 ################################################################
 # LAUNCH FUNCTION

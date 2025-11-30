@@ -22,7 +22,11 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   ```bash
   source .venv/bin/activate
   ```
-- 一键启动（包含依赖安装与端口准备）：
+- 一键安装依赖（使用统一的 requirements.txt）：
+  ```bash
+  pip install -r requirements.txt
+  ```
+- 一键启动所有服务：
   ```bash
   cd path/to/MindfulMentor
   ./scripts/StartAll.sh

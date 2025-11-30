@@ -1,0 +1,20 @@
+# MindfulMentor Unified Dependencies
+# Consolidated from all module-specific Requirements.txt files
+
+# Core FastAPI & Web Framework
+fastapi==0.110.0
+uvicorn[standard]==0.23.2
+pydantic==1.10.13
+
+# HTTP Clients
+httpx==0.24.1
+requests==2.31.0
+
+# ML & NLP (EmotionService, LlmGateway)
+transformers==4.39.3
+huggingface-hub==0.22.2
+torch>=2.2.0,<3.0
+
+# Frontend (Streamlit)
+streamlit==1.29.0
+plotly==5.18.0
