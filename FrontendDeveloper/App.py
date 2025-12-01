@@ -225,7 +225,7 @@ with st.expander("Show details", expanded=False):
         - PromptEngine → choose the right prompt template
         - LlmGateway → call the model with fallback
         - Orchestrator → stitch safety, prompt, and generation
-        - FrontEnd → capture input, visualize results
+        - FrontendDeveloper → capture input, visualize results
 
         **Flow**
         - classify the dominant emotion
@@ -245,7 +245,7 @@ with st.expander("Show details", expanded=False):
           <div class="arrow">→</div>
           <div class="node">Orchestrator</div>
           <div class="arrow">→</div>
-          <div class="node">FrontEnd</div>
+          <div class="node">FrontendDeveloper</div>
         </div>
         """,
         unsafe_allow_html=True,

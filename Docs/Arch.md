@@ -6,7 +6,7 @@ MindfulMentor 采用松耦合的多模块拆分：
 2) PromptEngine：根据情绪强度选择模板，输出安全 Prompt；对外 `/prompt` 或被 Orchestrator 直接 import。
 3) LlmGateway：封装 LLM 调用（OpenAI/DeepSeek/Mock），统一 `/generate`。
 4) Orchestrator：编排 Emotion → Prompt → LLM，提供 `/chat` `/breathing` `/thought-clarify`。
-5) FrontEnd：Streamlit UI，统一调用 Orchestrator。
+5) FrontendDeveloper：Streamlit UI，统一调用 Orchestrator。
 
 ### 调用链（本地 import 路径）
 ```
@@ -18,7 +18,7 @@ Orchestrator.Flows.chat_flow
 
 ### 配置与拓展
 - LlmGateway/Config.py 读取环境变量：`LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`。
-- 前端通过 `FrontEnd/Config.py` 配置 Orchestrator 地址。
+- 前端通过 `FrontendDeveloper/Config.py` 配置 Orchestrator 地址。
 - Safety 模块提供硬规则检测，可扩展词典/正则。
 
 ### 部署建议

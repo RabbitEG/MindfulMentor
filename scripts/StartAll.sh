@@ -289,8 +289,8 @@ wait_port 8003 "Orchestrator" || exit 1
 
 free_port 8501
 # headless=true to stop streamlit from auto-opening random browser handlers; we open 8501 ourselves below.
-launch "frontend"     "${ROOT}"    streamlit run "${ROOT}/FrontEnd/App.py" --server.port 8501 --server.address 127.0.0.1 --server.headless true
-wait_port 8501 "FrontEnd" || exit 1
+launch "frontend"     "${ROOT}"    streamlit run "${ROOT}/FrontendDeveloper/App.py" --server.port 8501 --server.address 127.0.0.1 --server.headless true
+wait_port 8501 "FrontendDeveloper" || exit 1
 
 
 url="http://127.0.0.1:8501"

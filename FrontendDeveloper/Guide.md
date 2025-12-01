@@ -1,4 +1,4 @@
-## FrontEnd 指南
+## FrontendDeveloper 指南
 
 本目录是可运行的 Streamlit 前端，负责把编排层的能力展示为网页。
 

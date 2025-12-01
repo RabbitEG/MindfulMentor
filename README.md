@@ -8,7 +8,7 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   - PromptEngine：按情绪强度切换模板/参数，确保高风险场景的提示更温和。
   - LlmGateway：解耦模型供应商（mock/本地/云端），失败时自动回退，便于在不同环境演示。
   - Orchestrator：串起安全检查、情绪、提示、生成，输出统一结构与 traceId，方便调试。
-  - FrontEnd：以可视化方式展示回复、情绪分布和建议练习，方便非技术同学体验 MVP。
+  - FrontendDeveloper：以可视化方式展示回复、情绪分布和建议练习，方便非技术同学体验 MVP。
 - 使用场景示例：压力/焦虑自助对话、呼吸引导、思维澄清，附 traceId 便于调试与审计。
 
 ## 快速开始
@@ -45,7 +45,7 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 ## 架构图（模块关系）
 ```mermaid
 flowchart LR
-  FE["FrontEnd<br/>Streamlit UI"] --> ORC["Orchestrator<br/>FastAPI"]
+  FE["FrontendDeveloper<br/>Streamlit UI"] --> ORC["Orchestrator<br/>FastAPI"]
   ORC --> EMO["EmotionService<br/>情绪识别"]
   ORC --> PROMPT["PromptEngine<br/>提示生成"]
   ORC --> LLM["LlmGateway<br/>模型网关"]
@@ -89,7 +89,7 @@ sequenceDiagram
 - Orchestrator `/chat` `/breathing` `/thought-clarify`：统一给前端使用。
 
 更多契约与调用链见 `Docs/Interfaces.md` 与 `Docs/Arch.md`。
-各子模块（EmotionService / PromptEngine / LlmGateway / Orchestrator / FrontEnd）都有各自的 `README.md`，详细说明职责、名词和接口。
+各子模块（EmotionService / PromptEngine / LlmGateway / Orchestrator / FrontendDeveloper）都有各自的 `README.md`，详细说明职责、名词和接口。
 
 ## 协作 / 提交须知
 仓库：https://github.com/RabbitEG/MindfulMentor
