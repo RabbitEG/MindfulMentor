@@ -87,13 +87,13 @@ class TinyLocalProvider(BaseProvider):
 
 class OpenAICompatibleProvider(BaseProvider):
     """
-    Lightweight OpenAI/DeepSeek compatible client using httpx only.
+    Lightweight OpenAI-compatible client using httpx only.
 
     This keeps dependencies small while making it easy to point to an API
     backend later (set base_url/api_key/api_model in env).
     """
 
-    name = "DeepSeek"
+    name = "openai-compatible"
 
     def __init__(self, api_key: str | None, base_url: str | None, model: str, timeout: float):
         if not api_key:
@@ -136,7 +136,7 @@ def get_provider(
         return MockProvider()
     if normalized in {"local", "tiny", "tiny-local"}:
         return TinyLocalProvider(model_id=config.local_model)
-    if normalized in {"openai", "deepseek", "api"}:
+    if normalized in {"openai", "deepseek", "api", "openai-compatible", "openai_compatible"}:
         return OpenAICompatibleProvider(
             api_key=api_key or config.api_key,
             base_url=base_url or config.base_url,

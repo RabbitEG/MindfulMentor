@@ -7,7 +7,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo ">>> Cleaning MindfulMentor processes and ports..."
 
 # 这几个是你项目用的端口：llm-gateway / orchestrator / emotion / frontend
-PORTS=(8002 8003 8004 8501)
+PORTS=(8001 8002 8003 8004 8501)
 
 kill_by_port() {
   local port="$1"
@@ -44,5 +44,6 @@ rm -f "$PROJECT_ROOT/.logs/pids" 2>/dev/null || true
 : > "$PROJECT_ROOT/.logs/prompt.log"       2>/dev/null || true
 : > "$PROJECT_ROOT/.logs/emotion.log"      2>/dev/null || true
 : > "$PROJECT_ROOT/.logs/frontend.log"     2>/dev/null || true
+: > "$PROJECT_ROOT/.logs/llm-gateway.log"  2>/dev/null || true
 
 echo ">>> Done. Environment cleaned."

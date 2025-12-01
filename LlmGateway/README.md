@@ -1,7 +1,7 @@
-LlmGateway 是统一的大模型网关，屏蔽不同 provider（OpenAI/DeepSeek/mock/本地 tiny 模型）的差异并返回 usage 统计。
+LlmGateway 是统一的大模型网关，屏蔽不同 provider（OpenAI 兼容接口 / 自定义 / mock / 本地 tiny 模型）的差异并返回 usage 统计。
 
 ## 名词解释
-- Provider：具体的大模型服务提供方或实现（OpenAI/DeepSeek/本地模型/mock）。
+- Provider：具体的大模型服务提供方或实现（OpenAI 兼容 / 自定义 base_url / 本地模型 / mock）。
 - Base URL/API Key：访问第三方 API 的地址和凭证，部分 provider 可为空（mock、本地）。
 - Usage：调用返回的 token 统计，字段通常包含 `prompt_tokens`、`completion_tokens`、`total_tokens`。
 - Fallback：当前 provider 失败时自动切换到 mock，保证调用不致崩溃。

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class GenerateRequest(BaseModel):
     prompt: str
-    provider: Optional[str] = Field(default=None, description="tiny-local|openai|deepseek|mock")
+    provider: Optional[str] = Field(default=None, description="tiny-local|openai|api|mock (openai-compatible)")
     max_tokens: int = Field(default=256, ge=1, le=2048)
     api_key: Optional[str] = Field(
         default=None,
