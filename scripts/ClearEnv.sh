@@ -52,5 +52,6 @@ rm -f "$PROJECT_ROOT/.logs/pids" 2>/dev/null || true
 : > "$PROJECT_ROOT/.logs/emotion.log"      2>/dev/null || true
 : > "$PROJECT_ROOT/.logs/llm-gateway.log"  2>/dev/null || true
 : > "$PROJECT_ROOT/.logs/frontend.log"     2>/dev/null || true
+: > "$PROJECT_ROOT/.logs/llm-gateway.log"  2>/dev/null || true
 
 echo ">>> Done. Environment cleaned."

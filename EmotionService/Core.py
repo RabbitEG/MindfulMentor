@@ -11,7 +11,8 @@ from EmotionService.Models import EmotionResult
 
 EMOTION_LABELS: List[str] = ["anxious", "angry", "sad", "tired", "neutral"]
 MODEL_ID = "facebook/bart-large-mnli"
-DEFAULT_MODEL_DIR = Path(__file__).resolve().parent / ".models" / MODEL_ID.replace("/", "--")
+# Keep in sync with download_models.py default path
+DEFAULT_MODEL_DIR = Path(__file__).resolve().parent / ".models" / MODEL_ID.split("/")[-1]
 
 def _resolve_model_dir() -> Path:
     """

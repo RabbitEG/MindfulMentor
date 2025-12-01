@@ -22,21 +22,17 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   ```bash
   source .venv/bin/activate
   ```
-- 一键安装依赖（使用统一的 requirements.txt）：
-  ```bash
-  pip install -r requirements.txt
-  ```
-- 一键启动所有服务：
+- 模型配置：不需要手动建 `.env`，`StartAll` 首次运行会自动生成 `.env`（含 LLM 配置）。把真实的 `LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_API_MODEL` 写到 `.env`；如果留空，会自动回退到玩具模型 `tiny-local` 并提示。
+- 一键启动（包含依赖安装与端口准备）：
   ```bash
   cd path/to/MindfulMentor
   ./scripts/StartAll.sh
   ```
   启动成功后浏览器访问 `http://127.0.0.1:8501`。
-- 每次跑完后建议清理环境与端口：
+- 日志位于 `.logs/`（`StartAll` 会在启动前自动清理端口、旧进程与旧日志）。如果只想单独清理环境，可运行：
   ```bash
   ./scripts/ClearEnv.sh
   ```
-  日志位于 `.logs/`。
 
 ## 名词速览
 - 情绪识别：把输入文本映射为预设情绪标签（如 anxious/angry）及强度。

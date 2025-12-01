@@ -11,7 +11,7 @@ def call_orchestrator(endpoint: str, payload: dict) -> dict:
         "https": None,
     }
     try:
-        resp = requests.post(url, json=payload, timeout=10, proxies=proxies)
+        resp = requests.post(url, json=payload, timeout=1000, proxies=proxies)
         resp.raise_for_status()
         data = resp.json()
     except requests.exceptions.Timeout:

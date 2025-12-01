@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import textwrap
-from typing import Dict, Tuple
+# from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import httpx
 
@@ -86,13 +87,13 @@ class TinyLocalProvider(BaseProvider):
 
 class OpenAICompatibleProvider(BaseProvider):
     """
-    Lightweight OpenAI/DeepSeek compatible client using httpx only.
+    Lightweight OpenAI-compatible client using httpx only.
 
     This keeps dependencies small while making it easy to point to an API
     backend later (set base_url/api_key/api_model in env).
     """
 
-    name = "openai"
+    name = "openai-compatible"
 
     def __init__(self, api_key: str | None, base_url: str | None, model: str, timeout: float):
         if not api_key:
@@ -127,14 +128,19 @@ class OpenAICompatibleProvider(BaseProvider):
         return text, usage
 
 
-def get_provider(name: str, config: LlmConfig) -> BaseProvider:
+def get_provider(
+    name: str, config: LlmConfig, *, api_key: Optional[str] = None, base_url: Optional[str] = None, api_model: Optional[str] = None
+) -> BaseProvider:
     normalized = (name or config.provider or "tiny-local").lower()
     if normalized in {"mock"}:
         return MockProvider()
     if normalized in {"local", "tiny", "tiny-local"}:
         return TinyLocalProvider(model_id=config.local_model)
-    if normalized in {"openai", "deepseek", "api"}:
+    if normalized in {"openai", "deepseek", "api", "openai-compatible", "openai_compatible"}:
         return OpenAICompatibleProvider(
-            api_key=config.api_key, base_url=config.base_url, model=config.api_model, timeout=config.request_timeout
+            api_key=api_key or config.api_key,
+            base_url=base_url or config.base_url,
+            model=api_model or config.api_model,
+            timeout=config.request_timeout,
         )
     raise ProviderError(f"Unknown provider '{normalized}'")

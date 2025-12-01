@@ -13,7 +13,14 @@ def generate_text(request: GenerateRequest) -> GenerateResponse:
     provider = request.provider or config.provider
 
     try:
-        client: BaseProvider = get_provider(provider, config)
+        # client: BaseProvider = get_provider(provider, config)
+        client: BaseProvider = get_provider(
+            provider,
+            config,
+            api_key=request.api_key,
+            base_url=request.base_url,
+            api_model=request.api_model,
+        )
         text, usage = client.generate(prompt=request.prompt, max_tokens=request.max_tokens)
         resolved_provider = client.name
     except ProviderError as exc:
