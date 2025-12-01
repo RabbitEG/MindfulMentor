@@ -141,7 +141,8 @@ fi
 ################################################################
 # EMOTION MODEL CHECK
 ################################################################
-MODEL_DIR="${ROOT}/EmotionService/.models/facebook--bart-large-mnli"
+# Keep in sync with EmotionService/download_models.py default path
+MODEL_DIR="${ROOT}/EmotionService/.models/bart-large-mnli"
 if [[ ! -d "${MODEL_DIR}" ]] || [[ -z "$(ls -A "${MODEL_DIR}" 2>/dev/null)" ]]; then
   echo ">>> Emotion model not found. Downloading..."
   python "${ROOT}/EmotionService/download_models.py" || {
