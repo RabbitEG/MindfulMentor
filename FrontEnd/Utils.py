@@ -6,7 +6,7 @@ def call_orchestrator(endpoint: str, payload: dict) -> dict:
     """Send a JSON payload to the orchestrator and normalize errors for the UI."""
     url = f"{ORCHESTRATOR_BASE}{endpoint}"
     try:
-        resp = requests.post(url, json=payload, timeout=10)
+        resp = requests.post(url, json=payload, timeout=1000)
         resp.raise_for_status()
         data = resp.json()
     except requests.exceptions.Timeout:

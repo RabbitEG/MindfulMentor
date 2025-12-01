@@ -22,10 +22,32 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   ```bash
   source .venv/bin/activate
   ```
+- 安装各项依赖
+  ```bash
+  pip install -r "./EmotionService/Requirements.txt" \
+              -r "./PromptEngine/Requirements.txt" \
+              -r "./LlmGateway/Requirements.txt" \
+              -r "/Orchestrator/Requirements.txt" \
+              -r "/FrontEnd/Requirements.txt"
+  ```
+- cd至EmotionService目录，下载模型：
+  ```bash
+  cd ./EmotionService
+  python download_models.py
+  ```
+- 创建本地.env文件
+  ```
+  ./MindfulMentor/.env
+  LLM_PROVIDER=api
+  LLM_API_KEY=复制APIKEY至此
+  LLM_BASE_URL=模型链接，例如 https://dashscope.aliyuncs.com/compatible-mode/v1
+  LLM_API_MODEL=模型名称 deepseek-r1
+  LLM_TIMEOUT=60
+  ```
 - 一键启动（包含依赖安装与端口准备）：
   ```bash
   cd path/to/MindfulMentor
-  ./scripts/StartAll.sh
+  ./scripts/start_new.sh
   ```
   启动成功后浏览器访问 `http://127.0.0.1:8501`。
 - 每次跑完后建议清理环境与端口：
