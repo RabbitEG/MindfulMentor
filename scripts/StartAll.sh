@@ -208,6 +208,35 @@ ensure_env_files
 load_env_files
 apply_llm_defaults
 
+FRONTEND_MODE="${FRONTEND_MODE:-release}"
+usage() {
+  cat <<'EOF'
+Usage: ./scripts/StartAll.sh [-d|-r]
+  -d   Use developer Streamlit frontend (FrontendDeveloper)
+  -r   Use release static frontend (FrontendRelease) [default]
+You can also set FRONTEND_MODE=developer|release.
+EOF
+}
+
+while getopts ":drh" opt; do
+  case "$opt" in
+    d) FRONTEND_MODE="developer" ;;
+    r) FRONTEND_MODE="release" ;;
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      echo "Unknown option: -$OPTARG"
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+echo ">>> FRONTEND_MODE=${FRONTEND_MODE} (developer|release)"
+
 ################################################################
 # LAUNCH FUNCTION
 ################################################################
@@ -288,9 +317,15 @@ launch "orchestrator" "${ROOT}"    python -m Orchestrator.App
 wait_port 8003 "Orchestrator" || exit 1
 
 free_port 8501
-# headless=true to stop streamlit from auto-opening random browser handlers; we open 8501 ourselves below.
-launch "frontend"     "${ROOT}"    streamlit run "${ROOT}/FrontendDeveloper/App.py" --server.port 8501 --server.address 127.0.0.1 --server.headless true
-wait_port 8501 "FrontendDeveloper" || exit 1
+# release UI is static; developer UI is Streamlit. Switch via FRONTEND_MODE.
+if [[ "${FRONTEND_MODE}" == "release" ]]; then
+  launch "frontend" "${ROOT}" "${PYTHON_BIN}" -m http.server 8501 -d "${ROOT}/FrontendRelease"
+  wait_port 8501 "FrontendRelease" || exit 1
+else
+  # headless=true to stop streamlit from auto-opening random browser handlers; we open 8501 ourselves below.
+  launch "frontend" "${ROOT}" streamlit run "${ROOT}/FrontendDeveloper/App.py" --server.port 8501 --server.address 127.0.0.1 --server.headless true
+  wait_port 8501 "FrontendDeveloper" || exit 1
+fi
 
 
 url="http://127.0.0.1:8501"

@@ -144,8 +144,6 @@ if "history" not in st.session_state:
     st.session_state["history"] = []
 if "last_response" not in st.session_state:
     st.session_state["last_response"] = None
-if "flow" not in st.session_state:
-    st.session_state["flow"] = "chat"
 if "dev_mode" not in st.session_state:
     st.session_state["dev_mode"] = False
 
@@ -157,7 +155,7 @@ with header_right:
     st.checkbox("Developer mode", key="dev_mode")
 
 st.markdown(
-    '<div class="hero">Send a feeling and get a safe, empathic reply. Choose chat, breathing, or thought clarify.</div>',
+    '<div class="hero">Send a feeling and get a safe, empathic reply. Chat flow adapts tone based on emotion intensity.</div>',
     unsafe_allow_html=True,
 )
 
@@ -180,18 +178,6 @@ with st.form("chat_form"):
         placeholder="I keep staring at my screen because the deadlines are piling up...",
         help="English only.",
     )
-    st.markdown("#### Pick a flow")
-    with st.container():
-        flow = st.radio(
-            "",
-            options=["chat", "breathing", "thought-clarify"],
-            index=["chat", "breathing", "thought-clarify"].index(st.session_state.get("flow", "chat")),
-            format_func=lambda x: {"chat": "Chat", "breathing": "Breathing", "thought-clarify": "Thought Clarify"}[x],
-            horizontal=True,
-            key="flow_radio",
-            label_visibility="collapsed",
-        )
-        st.session_state["flow"] = flow
 
     col_gap, col_submit = st.columns([3, 1])
     with col_submit:
@@ -201,16 +187,10 @@ with st.form("chat_form"):
 
 response = st.session_state.get("last_response")
 if submitted:
-    endpoint_map = {
-        "chat": "/chat",
-        "breathing": "/breathing",
-        "thought-clarify": "/thought-clarify",
-    }
-    endpoint = endpoint_map[flow]
-    with st.spinner(f"Calling {flow} flow..."):
-        response = call_orchestrator(endpoint, {"text": user_text})
+    with st.spinner("Calling chat flow..."):
+        response = call_orchestrator("/chat", {"text": user_text})
     st.session_state["last_response"] = response
-    st.session_state["history"].insert(0, {"flow": flow, "input": user_text, "response": response})
+    st.session_state["history"].insert(0, {"flow": "chat", "input": user_text, "response": response})
     st.session_state["history"] = st.session_state["history"][:8]
 
 st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)

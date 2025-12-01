@@ -19,14 +19,14 @@ def _normalize_intensity(intensity: int) -> int:
         value = int(intensity)
     except (TypeError, ValueError):
         return 1
-    return max(1, min(3, value))
+    return max(1, value)
 
 
 def _select_mode(intensity: int) -> str:
     """
-    Use high_safety mode for the highest intensity; otherwise normal.
+    Use high_safety mode for intensity strictly above 3; otherwise normal.
     """
-    return "high_safety" if intensity >= 3 else "normal"
+    return "high_safety" if intensity > 3 else "normal"
 
 
 def _template_name(mode: str) -> str:

@@ -35,5 +35,6 @@ def load_config() -> LlmConfig:
         base_url=base_url,
         api_model=api_model,
         local_model=os.getenv("LLM_LOCAL_MODEL", _LOCAL_DEFAULT_MODEL),
-        request_timeout=float(os.getenv("LLM_TIMEOUT", "30")),
+        # Unified LLM timeout sourced from .env (fallback 60s to match StartAll template)
+        request_timeout=float(os.getenv("LLM_TIMEOUT", "60")),
     )

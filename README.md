@@ -9,6 +9,7 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   - LlmGateway：解耦模型供应商（mock/本地/云端），失败时自动回退，便于在不同环境演示。
   - Orchestrator：串起安全检查、情绪、提示、生成，输出统一结构与 traceId，方便调试。
   - FrontendDeveloper：以可视化方式展示回复、情绪分布和建议练习，方便非技术同学体验 MVP。
+  - FrontendRelease：纯静态版前端发布目录，用于打包/演示。
 - 使用场景示例：压力/焦虑自助对话、呼吸引导、思维澄清，附 traceId 便于调试与审计。
 
 ## 快速开始
@@ -28,6 +29,7 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
   cd path/to/MindfulMentor
   ./scripts/StartAll.sh
   ```
+  - 默认前端为静态发布版（FrontendRelease）。若要切换为开发版 Streamlit UI，使用 `./scripts/StartAll.sh -d` 或 `FRONTEND_MODE=developer ./scripts/StartAll.sh`。用 `-r` 可显式指定回静态版。
   启动成功后浏览器访问 `http://127.0.0.1:8501`。
 - 日志位于 `.logs/`（`StartAll` 会在启动前自动清理端口、旧进程与旧日志）。如果只想单独清理环境，可运行：
   ```bash
@@ -86,7 +88,7 @@ sequenceDiagram
 - EmotionService `/analyze`：文本 → 情绪标签/强度。
 - PromptEngine `/prompt`：情绪 + 文本 → 安全 Prompt。
 - LlmGateway `/generate`：Prompt → LLM 回复（可切换 provider）。
-- Orchestrator `/chat` `/breathing` `/thought-clarify`：统一给前端使用。
+- Orchestrator `/chat`：统一给前端使用。
 
 更多契约与调用链见 `Docs/Interfaces.md` 与 `Docs/Arch.md`。
 各子模块（EmotionService / PromptEngine / LlmGateway / Orchestrator / FrontendDeveloper）都有各自的 `README.md`，详细说明职责、名词和接口。

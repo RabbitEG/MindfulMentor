@@ -50,8 +50,11 @@ _classifier = pipeline(
 
 def _scores_to_intensity(max_score: float) -> int:
     """
-    Map confidence to discrete intensity (1-3).
+    Map confidence to discrete intensity (1-4).
+    4 indicates very high confidence and triggers extra safety prompt downstream.
     """
+    if max_score >= 0.82:
+        return 4
     if max_score >= 0.66:
         return 3
     if max_score >= 0.33:
@@ -63,7 +66,8 @@ def analyze_text(text: str) -> EmotionResult:
     """
     Use HF zero-shot classification to map text into predefined emotion labels.
     """
-    result = _classifier(text, candidate_labels=EMOTION_LABELS, multi_label=True)
+    # truncation=True to avoid over-length inputs throwing tokenizer errors
+    result = _classifier(text, candidate_labels=EMOTION_LABELS, multi_label=True, truncation=True)
     label_scores: Dict[str, float] = {label: 0.0 for label in EMOTION_LABELS}
 
     for label, score in zip(result["labels"], result["scores"]):

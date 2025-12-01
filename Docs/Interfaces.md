@@ -79,29 +79,8 @@
     "reply": "string",
     "emotion": { "emotion": "...", "intensity": 1, "scores": { "...": 0.0 } },
     "mode": "high_safety|normal",
-    "suggestedExercise": "breathing|thought_log|null",
+    "suggestedExercise": "grounding|thought_log|null",
     "traceId": "string"
-  }
-  ```
-
-### 5) Orchestrator `/breathing`
-- **Method**: POST
-- **Response**:
-  ```json
-  {
-    "title": "1-minute breathing",
-    "steps": ["...", "..."]
-  }
-  ```
-
-### 6) Orchestrator `/thought-clarify`
-- **Method**: POST
-- **Response**:
-  ```json
-  {
-    "facts": "string",
-    "emotions": "string",
-    "needs": "string"
   }
   ```
 

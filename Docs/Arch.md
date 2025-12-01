@@ -5,7 +5,7 @@ MindfulMentor 采用松耦合的多模块拆分：
 1) EmotionService：负责基础情绪识别，可用 HF 模型或规则；对外暴露 `/analyze`。
 2) PromptEngine：根据情绪强度选择模板，输出安全 Prompt；对外 `/prompt` 或被 Orchestrator 直接 import。
 3) LlmGateway：封装 LLM 调用（OpenAI/DeepSeek/Mock），统一 `/generate`。
-4) Orchestrator：编排 Emotion → Prompt → LLM，提供 `/chat` `/breathing` `/thought-clarify`。
+4) Orchestrator：编排 Emotion → Prompt → LLM，提供 `/chat`。
 5) FrontendDeveloper：Streamlit UI，统一调用 Orchestrator。
 
 ### 调用链（本地 import 路径）

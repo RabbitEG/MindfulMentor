@@ -16,7 +16,7 @@ class ProviderError(RuntimeError):
 class BaseProvider:
     name: str
 
-    def generate(self, prompt: str, max_tokens: int) -> Tuple[str, Dict]:
+    def generate(self, prompt: str, max_tokens: int | None) -> Tuple[str, Dict]:
         raise NotImplementedError
 
 
@@ -27,10 +27,10 @@ class MockProvider(BaseProvider):
         preview = prompt.strip().splitlines()[0][:120]
         return f"(mock) Notional model reply based on: {preview}"
 
-    def generate(self, prompt: str, max_tokens: int) -> Tuple[str, Dict]:
+    def generate(self, prompt: str, max_tokens: int | None) -> Tuple[str, Dict]:
         text = self._mock_response(prompt)
         usage = {"prompt_tokens": len(prompt.split()), "completion_tokens": 0, "total_tokens": len(prompt.split())}
-        return textwrap.shorten(text, width=512, placeholder="..."), usage
+        return text, usage
 
 
 class TinyLocalProvider(BaseProvider):
@@ -63,11 +63,12 @@ class TinyLocalProvider(BaseProvider):
         # keep on CPU for portability
         self._pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, device=-1)
 
-    def generate(self, prompt: str, max_tokens: int) -> Tuple[str, Dict]:
+    def generate(self, prompt: str, max_tokens: int | None) -> Tuple[str, Dict]:
         self._lazy_load()
+        max_new_tokens = max_tokens or 512  # pipeline requires a value; fall back to a safe length
         outputs = self._pipeline(
             prompt,
-            max_new_tokens=max_tokens,
+            max_new_tokens=max_new_tokens,
             do_sample=True,
             temperature=0.8,
             num_return_sequences=1,
@@ -103,15 +104,12 @@ class OpenAICompatibleProvider(BaseProvider):
         self.model = model
         self.timeout = timeout
 
-    def generate(self, prompt: str, max_tokens: int) -> Tuple[str, Dict]:
+    def generate(self, prompt: str, max_tokens: int | None) -> Tuple[str, Dict]:
         url = f"{self.base_url}/chat/completions"
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
-        payload = {
-            "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": max_tokens,
-            "temperature": 0.7,
-        }
+        payload = {"model": self.model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.7}
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=headers, json=payload)
             try:

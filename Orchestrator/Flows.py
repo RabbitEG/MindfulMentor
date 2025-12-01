@@ -17,7 +17,9 @@ from LlmGateway.Models import GenerateRequest
 from PromptEngine.Core import build_prompt
 from PromptEngine.Models import PromptRequest
 from .Safety import hard_stop_message, is_safe
+import datetime
 
+LOG_FILE = BASE_DIR.parent / ".logs" / "orchestrator.log"
 
 def _new_trace_id() -> str:
     return str(uuid.uuid4())
@@ -34,6 +36,7 @@ def _emotion_payload(emotion) -> Dict[str, Any]:
 
 
 def _error_response(code: str, detail: str, trace_id: str, meta: Dict[str, Any]) -> Dict[str, Any]:
+    _append_log(trace_id, status="error", detail=detail)
     return {
         "message": "Something went wrong. Please try again.",
         "trace_id": trace_id,
@@ -41,6 +44,22 @@ def _error_response(code: str, detail: str, trace_id: str, meta: Dict[str, Any])
         "emotion": None,
         "error": {"code": code, "detail": detail},
     }
+
+
+def _append_log(trace_id: str, *, status: str, user_text: str | None = None, detail: str | None = None):
+    try:
+        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.datetime.utcnow().isoformat() + "Z"
+        with LOG_FILE.open("a", encoding="utf-8") as f:
+            f.write(f"\n--- Orchestrator @ {timestamp} ---\n")
+            f.write(f"trace_id: {trace_id}\n")
+            f.write(f"status: {status}\n")
+            if user_text:
+                f.write(f"user_text: {user_text}\n")
+            if detail:
+                f.write(f"detail: {detail}\n")
+    except Exception:
+        pass
 
 
 def chat_flow(text: str) -> Dict[str, Any]:
@@ -52,12 +71,13 @@ def chat_flow(text: str) -> Dict[str, Any]:
 
     if not is_safe(text):
         message = hard_stop_message()
+        _append_log(trace_id, status="blocked", user_text=text, detail="safety_block")
         return {
             "message": message,
             "reply": message,
             "trace_id": trace_id,
             "mode": "high_safety",
-            "meta": {**base_meta, "safety": "blocked", "suggestedExercise": "breathing"},
+            "meta": {**base_meta, "safety": "blocked", "suggestedExercise": "grounding"},
             "emotion": None,
         }
 
@@ -72,9 +92,14 @@ def chat_flow(text: str) -> Dict[str, Any]:
             )
         )
         mode = prompt.mode
-        llm_response = generate_text(GenerateRequest(prompt=prompt.prompt))
+        llm_response = generate_text(
+            GenerateRequest(
+                prompt=prompt.prompt,
+            )
+        )
 
-        suggested = "breathing" if mode == "high_safety" else "thought_log"
+        suggested = "grounding" if mode == "high_safety" else "thought_log"
+        _append_log(trace_id, status="ok", user_text=text)
         return {
             "message": llm_response.text,
             "reply": llm_response.text,
@@ -92,35 +117,8 @@ def chat_flow(text: str) -> Dict[str, Any]:
             "suggestedExercise": suggested,
         }
     except Exception as exc:
+        _append_log(trace_id, status="exception", user_text=text, detail=str(exc))
         return _error_response("internal_error", str(exc), trace_id, base_meta)
 
 
-def breathing_flow(text: str) -> Dict[str, Any]:
-    trace_id = _new_trace_id()
-    steps = [
-        "Inhale gently through the nose for 4 seconds.",
-        "Hold your breath softly for 4 seconds.",
-        "Exhale through the mouth for 4 seconds.",
-        "Hold again for 4 seconds. Repeat for 3-5 cycles.",
-    ]
-    message = "Box breathing: 4s inhale, 4s hold, 4s exhale, 4s hold."
-    meta = {
-        "flow": "breathing",
-        "title": "Box Breathing",
-        "steps": steps,
-        "duration": "1-2 minutes",
-        "suggestedExercise": "breathing",
-    }
-    return {"message": message, "trace_id": trace_id, "meta": meta, "emotion": None, "suggestedExercise": "breathing"}
-
-
-def thought_clarify_flow(text: str) -> Dict[str, Any]:
-    trace_id = _new_trace_id()
-    sections = {
-        "facts": f"You mentioned: {text.strip()}" if text else "List the key facts you know.",
-        "emotions": "Name what you feel right now (e.g., anxious, frustrated, sad).",
-        "needs": "State what you need or hope for (e.g., clarity, support, time).",
-    }
-    message = "Let's clarify: note the facts, your emotions, and what you need next."
-    meta = {"flow": "thought-clarify", "suggestedExercise": "thought_log", **sections}
-    return {"message": message, "trace_id": trace_id, "meta": meta, "emotion": None, "suggestedExercise": "thought_log"}
+__all__ = ["chat_flow"]

@@ -5,7 +5,10 @@ from pydantic import BaseModel, Field
 class GenerateRequest(BaseModel):
     prompt: str
     provider: Optional[str] = Field(default=None, description="tiny-local|openai|api|mock (openai-compatible)")
-    max_tokens: int = Field(default=256, ge=1, le=2048)
+    max_tokens: Optional[int] = Field(
+        default=None,
+        description="Optional max tokens for completion; if omitted, provider default/context window applies.",
+    )
     api_key: Optional[str] = Field(
         default=None,
         description="Override API key for openai-compatible providers so mature hosted models can be called without restarting the service.",

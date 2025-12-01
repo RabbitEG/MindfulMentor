@@ -7,15 +7,13 @@ Orchestrator 负责将 EmotionService、PromptEngine、LlmGateway 串成完整�
 - 安全阻断：检测到高风险内容时直接返回安全提示，不再调用下游模型。
 
 ## 职责与结构
-- `App.py`：FastAPI 入口，注册 `/chat`、`/breathing`、`/thought-clarify`、`/health`。
+- `App.py`：FastAPI 入口，注册 `/chat`、`/health`。
 - `Flows.py`：封装各业务流程，处理安全校验、traceId 生成、错误包装。
 - `Safety.py`：简单的硬规则过滤与阻断提示。
 - `Models.py`：定义请求/响应数据模型。
 
 ## 接口
 - `/chat`：串 Emotion → Prompt → LLM，返回 `{reply, mode, emotion, trace_id, meta}`。
-- `/breathing`：返回结构化呼吸练习。
-- `/thought-clarify`：提供事实/情绪/需求梳理提示。
 - `/health`：存活探针。
 
 ## 后续可改进

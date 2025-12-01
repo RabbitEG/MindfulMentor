@@ -10,8 +10,8 @@ class PromptRequest(BaseModel):
 
     text: str = Field(..., description="Raw user text")
     emotion: str = Field(..., description="anxious|angry|sad|tired|neutral")
-    intensity: conint(ge=1, le=3) = Field(
-        ..., description="Discrete intensity level 1-3; 3 means high intensity"
+    intensity: conint(ge=1, le=4) = Field(
+        ..., description="Discrete intensity level 1-4; >3 means high intensity"
     )
     context: Optional[Dict[str, str]] = Field(
         default_factory=dict, description="Optional metadata to surface inside prompt"

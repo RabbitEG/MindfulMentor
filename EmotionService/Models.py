@@ -7,7 +7,7 @@ class EmotionRequest(BaseModel):
 
 class EmotionResult(BaseModel):
     emotion: str = Field(..., description="anxious|angry|sad|tired|neutral")
-    intensity: int = Field(..., ge=1, le=3, description="Discrete intensity level 1-3")
+    intensity: int = Field(..., ge=1, le=4, description="Discrete intensity level 1-4")
     scores: dict[str, float] = Field(default_factory=dict, description="Per-emotion probability scores")
 
 
