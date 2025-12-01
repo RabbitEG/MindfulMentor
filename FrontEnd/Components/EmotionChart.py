@@ -12,35 +12,53 @@ def _safe_score(value) -> float:
         return 0.0
 
 
-def render_emotion_chart(emotion: dict | None):
-    if not emotion:
-        st.info("Emotion insights will appear after a chat run.")
+def render_emotion_chart(history: list[dict]):
+    st.subheader("Emotion Heatmap")
+
+    if not history:
+        st.info("Emotion insights will appear after you run a flow.")
         return
 
-    scores = emotion.get("scores") or {}
-    if not isinstance(scores, dict) or not scores:
-        st.warning("No emotion scores available for charting.")
+    rows: list[list[float]] = []
+    y_labels: list[str] = []
+
+    for idx, item in enumerate(history):
+        response = item.get("response", {}) or {}
+        emotion = response.get("emotion") or {}
+        scores = emotion.get("scores") if isinstance(emotion, dict) else None
+        if not isinstance(scores, dict) or not scores:
+            continue
+
+        row = [_safe_score(scores.get(label, 0.0)) for label in EMOTION_ORDER]
+        rows.append(row)
+
+        flow = item.get("flow", "unknown")
+        trace = response.get("trace_id") or response.get("traceId") or (response.get("meta", {}) or {}).get("traceId")
+        trace_tail = trace[-6:] if isinstance(trace, str) and len(trace) >= 6 else (trace or "no-trace")
+        y_labels.append(f"{idx + 1} · {flow} · {trace_tail}")
+
+    if not rows:
+        st.info("No emotion scores available yet.")
         return
 
-    labels = EMOTION_ORDER if set(EMOTION_ORDER) >= set(scores.keys()) else list(scores.keys())
-    values = [_safe_score(scores.get(label, 0.0)) for label in labels]
-
-    title = f"Emotion: {emotion.get('label', 'unknown').title()} (intensity {emotion.get('intensity', '?')})"
-    fig = px.line(
-        x=labels,
-        y=values,
-        markers=True,
-        labels={"x": "emotion", "y": "score"},
-        title=title,
-        range_y=[0, 1],
-        template="plotly_dark",
-        color_discrete_sequence=["#22d3ee"],
+    fig = px.imshow(
+        rows,
+        x=EMOTION_ORDER,
+        y=y_labels,
+        color_continuous_scale="Blues",
+        zmin=0,
+        zmax=1,
+        labels={"x": "emotion", "y": "run", "color": "score"},
+        aspect="auto",
+        origin="upper",
     )
     fig.update_layout(
+        title="History × Emotion scores",
         paper_bgcolor="#0b1220",
         plot_bgcolor="#0b1220",
         font_color="#e5e7eb",
         margin=dict(l=20, r=20, t=60, b=20),
-        hovermode="x unified",
+        coloraxis_showscale=True,
     )
+    fig.update_xaxes(side="top")
     st.plotly_chart(fig, use_container_width=True)

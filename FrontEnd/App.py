@@ -81,8 +81,15 @@ st.markdown(
 st.markdown(
     """
     <div class="info-card">
-    <strong>Project Brief</strong><br/>
-    MindfulMentor is an English-only demo: type how you feel in English to get a safe, empathic reply. It links five pieces—EmotionService, PromptEngine, LlmGateway, Orchestrator, and this FrontEnd—to turn emotions into prompts, run them through a model, and visualize the dominant emotion plus practice ideas. Enter your feelings, choose chat / breathing / thought-clarify, and read the response with its trace id for debugging. See the README for full architecture and flow notes.
+    <strong>Introduction</strong><br/>
+    MindfulMentor is a small multi-service demo that turns free-text feelings into structured prompts, routes them through an LLM, and returns a safe, emotion-aware response.<br/><br/>
+    It connects five independent services—EmotionService, PromptEngine, LlmGateway, Orchestrator, and this FrontEnd—to show how a minimal emotion-aware flow can be assembled end-to-end.<br/><br/>
+    Type anything you feel, pick a flow (chat / breathing / thought-clarify), and the system will:<br/>
+    · classify the dominant emotion,<br/>
+    · generate an appropriate prompt,<br/>
+    · call the model through the gateway,<br/>
+    · and render the model’s reply together with the trace id for debugging.<br/><br/>
+    This demo focuses on architecture clarity rather than content. See the README for diagrams and flow notes.
     </div>
     """,
     unsafe_allow_html=True,
@@ -126,8 +133,7 @@ with col_main:
     render_response_panel(response)
 
 with col_side:
-    emotion = response.get("emotion") if response else None
-    render_emotion_chart(emotion)
+    render_emotion_chart(st.session_state["history"])
     suggested = []
     meta = response.get("meta", {}) if response else {}
     if meta:
