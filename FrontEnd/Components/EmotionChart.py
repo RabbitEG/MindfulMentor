@@ -12,7 +12,7 @@ def _safe_score(value) -> float:
         return 0.0
 
 
-def render_emotion_chart(history: list[dict]):
+def render_emotion_chart(history: list[dict], dev_mode: bool = False):
     st.subheader("Emotion Heatmap")
 
     if not history:
@@ -33,9 +33,12 @@ def render_emotion_chart(history: list[dict]):
         rows.append(row)
 
         flow = item.get("flow", "unknown")
-        trace = response.get("trace_id") or response.get("traceId") or (response.get("meta", {}) or {}).get("traceId")
-        trace_tail = trace[-6:] if isinstance(trace, str) and len(trace) >= 6 else (trace or "no-trace")
-        y_labels.append(f"{idx + 1} · {flow} · {trace_tail}")
+        label_parts = [f"{idx + 1}", flow]
+        if dev_mode:
+            trace = response.get("trace_id") or response.get("traceId") or (response.get("meta", {}) or {}).get("traceId")
+            if trace:
+                label_parts.append(trace[-6:] if isinstance(trace, str) and len(trace) >= 6 else str(trace))
+        y_labels.append(" · ".join(label_parts))
 
     if not rows:
         st.info("No emotion scores available yet.")
