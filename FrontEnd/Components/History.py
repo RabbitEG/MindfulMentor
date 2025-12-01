@@ -19,6 +19,3 @@ def render_history(history: list[dict]):
                     f"Emotion → {emotion.get('label', '')} / {emotion.get('intensity', '')} "
                     f"(score: {emotion.get('score', '0')})"
                 )
-            meta = response.get("meta")
-            if meta:
-                st.json(meta)

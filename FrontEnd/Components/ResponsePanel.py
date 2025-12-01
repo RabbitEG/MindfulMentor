@@ -24,5 +24,5 @@ def render_response_panel(response: dict | None):
             st.caption(f"endpoint: {endpoint}")
 
     if meta:
-        st.write("**Meta**")
-        st.json(meta)
+        with st.expander("Meta (debug)", expanded=False):
+            st.json(meta)

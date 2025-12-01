@@ -28,6 +28,7 @@ st.markdown(
         color: #e5e7eb;
         border: 1px solid #1e293b;
         box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+        margin-bottom: 1rem;
     }
     h1, h2, h3, .stRadio label, .stButton button {
         color: #e5e7eb !important;
@@ -54,6 +55,12 @@ st.markdown(
     .stAlert {
         background: rgba(34, 51, 84, 0.6) !important;
     }
+    .info-card {
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid #1f2937;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -71,7 +78,22 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-default_text = "I feel a bit overwhelmed by deadlines."
+st.markdown(
+    """
+    <div class="info-card">
+    <strong>Project Brief</strong><br/>
+    MindfulMentor is an English-only demo: type how you feel in English to get a safe, empathic reply. It links five pieces—EmotionService, PromptEngine, LlmGateway, Orchestrator, and this FrontEnd—to turn emotions into prompts, run them through a model, and visualize the dominant emotion plus practice ideas. Enter your feelings, choose chat / breathing / thought-clarify, and read the response with its trace id for debugging. See the README for full architecture and flow notes.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+default_text = (
+    "I keep staring at my screen because the deadlines are piling up. "
+    "My shoulders are tense and I haven't slept well this week. "
+    "I worry my team will think I'm dropping the ball, even though I'm trying. "
+    "Can you help me figure out where to start?"
+)
 with st.form("chat_form"):
     user_text = render_chat_panel(default_text)
     col_flow, col_submit = st.columns([3, 1])

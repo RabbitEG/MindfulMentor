@@ -9,5 +9,5 @@ def render_chat_panel(default_text: str, key: str = "user_text") -> str:
         value=default_text,
         height=180,
         key=key,
-        help="This text will be sent to the orchestrator.",
+        help="English only: this text will be sent to the orchestrator.",
     )

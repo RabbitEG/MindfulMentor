@@ -1,6 +1,14 @@
 INFO:     Will watch for changes in these directories: ['/home/rabbi/MindfulMentor']
 INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
-INFO:     Started reloader process [56583] using WatchFiles
-INFO:     Started server process [56587]
+INFO:     Started reloader process [14641] using WatchFiles
+INFO:     Started server process [14645]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'FrontEnd/App.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [14645]
+INFO:     Started server process [15635]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
