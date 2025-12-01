@@ -22,12 +22,56 @@ source "${VENV}/bin/activate" || {
     exit 1
 }
 
-echo ">>> Installing requirements for all modules..."
-pip install -r "${ROOT}/EmotionService/Requirements.txt" \
-             -r "${ROOT}/PromptEngine/Requirements.txt" \
-             -r "${ROOT}/LlmGateway/Requirements.txt" \
-             -r "${ROOT}/Orchestrator/Requirements.txt" \
-             -r "${ROOT}/FrontEnd/Requirements.txt"
+################################################################
+# SMART DEPENDENCY CHECK
+################################################################
+# Only install if requirements have changed or packages are missing
+REQUIREMENTS_FILE="${ROOT}/requirements.txt"
+INSTALL_MARKER="${VENV}/.installed_requirements_hash"
+
+should_install() {
+  # If marker doesn't exist, need to install
+  if [[ ! -f "${INSTALL_MARKER}" ]]; then
+    return 0
+  fi
+  
+  # Check if requirements.txt has changed
+  local current_hash
+  current_hash=$(md5sum "${REQUIREMENTS_FILE}" | cut -d' ' -f1)
+  local saved_hash
+  saved_hash=$(cat "${INSTALL_MARKER}" 2>/dev/null || echo "")
+  
+  if [[ "${current_hash}" != "${saved_hash}" ]]; then
+    return 0
+  fi
+  
+  # Quick sanity check: verify key packages are installed
+  python -c "import fastapi, streamlit, transformers" 2>/dev/null || return 0
+  
+  return 1
+}
+
+if should_install; then
+  echo ">>> Installing/updating dependencies..."
+  pip install -q -r "${REQUIREMENTS_FILE}"
+  md5sum "${REQUIREMENTS_FILE}" | cut -d' ' -f1 > "${INSTALL_MARKER}"
+  echo ">>> Dependencies installed."
+else
+  echo ">>> Dependencies already satisfied (skipping pip install)."
+fi
+
+################################################################
+# EMOTION MODEL CHECK
+################################################################
+MODEL_DIR="${ROOT}/EmotionService/.models/facebook--bart-large-mnli"
+if [[ ! -d "${MODEL_DIR}" ]] || [[ -z "$(ls -A "${MODEL_DIR}" 2>/dev/null)" ]]; then
+  echo ">>> Emotion model not found. Downloading..."
+  python "${ROOT}/EmotionService/download_models.py" || {
+    echo "!!! WARNING: Model download failed. Service may not work properly."
+  }
+else
+  echo ">>> Emotion model already cached."
+fi
 
 ################################################################
 # LAUNCH FUNCTION
@@ -56,11 +100,22 @@ rm -f "${LOG_DIR}/pids"
 free_port() {
   local port="$1"
   local pids
-  pids=$(lsof -ti tcp:"${port}" || true)
+  pids=$(lsof -ti tcp:"${port}" 2>/dev/null || true)
   if [[ -n "${pids}" ]]; then
     echo ">>> Port ${port} in use by PID(s): ${pids}. Stopping to avoid collision..."
-    kill ${pids} || true
-    sleep 1
+    # Use kill -9 to force kill, then wait for port to be freed
+    kill -9 ${pids} 2>/dev/null || true
+    
+    # Wait up to 3 seconds for port to be released
+    for i in {1..6}; do
+      sleep 0.5
+      if ! lsof -ti tcp:"${port}" >/dev/null 2>&1; then
+        echo ">>> Port ${port} freed."
+        return 0
+      fi
+    done
+    
+    echo "!!! WARNING: Port ${port} may still be in use."
   fi
 }
 

@@ -2,33 +2,43 @@ from __future__ import annotations
 
 """
 Utility to pre-download the Hugging Face model so runtime stays offline.
-Usage:
-  python download_models.py            # downloads to EmotionService/.models/...
-  EMOTION_MODEL_DIR=/tmp/mm-models python download_models.py
+This version downloads *only* the PyTorch + tokenizer files, 
+avoiding huge Flax/Rust snapshots and wrong directory structures.
 """
 
 import os
 from pathlib import Path
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer
+)
 
-from huggingface_hub import snapshot_download
 
 MODEL_ID = "facebook/bart-large-mnli"
-DEFAULT_MODEL_DIR = Path(__file__).resolve().parent / ".models" / MODEL_ID.replace("/", "--")
+
+# This directory uses a clean, correct HF-style name
+DEFAULT_MODEL_DIR = Path(__file__).resolve().parent / ".models" / MODEL_ID.split("/")[-1]
 
 
 def download_model(model_id: str = MODEL_ID, target_dir: Path | None = None) -> Path:
     """
-    Download the HF repo locally (no symlinks so the folder is self-contained).
+    Download only needed model files (PyTorch + tokenizer), 
+    not the full HF snapshot (~1.6 GB instead of 6 GB).
     """
     dest = target_dir or Path(os.environ.get("EMOTION_MODEL_DIR", DEFAULT_MODEL_DIR))
     dest.mkdir(parents=True, exist_ok=True)
 
-    snapshot_download(
-        repo_id=model_id,
-        local_dir=str(dest),
-        local_dir_use_symlinks=False,
-        revision=None,
+    # Download PyTorch model
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_id,
+        from_flax=False,          # don't download Flax weights
+        trust_remote_code=False,
     )
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    model.save_pretrained(dest)
+    tokenizer.save_pretrained(dest)
+
     return dest
 
 
