@@ -8,10 +8,8 @@ app = FastAPI(title="Orchestrator", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:8501",
-        "http://localhost:8501",
-    ],
+    # Frontend may be opened via WSL IP (e.g., 172.x.x.x) or localhost; allow all.
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

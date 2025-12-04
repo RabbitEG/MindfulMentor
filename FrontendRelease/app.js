@@ -10,18 +10,34 @@ const state = {
 const textarea = document.getElementById("user-input");
 const form = document.getElementById("chat-form");
 
+const MIN_EMOTION_SCORE = 0.01;
+
 const normalizeEmotions = (emotions) => {
-  if (Array.isArray(emotions)) {
-    return emotions
+  const cleanLabel = (label) => {
+    if (!label) return "";
+    const trimmed = String(label).trim();
+    if (!trimmed) return "";
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+  };
+
+  const normalizeList = (list) =>
+    list
       .filter((e) => e && e.label)
-      .map((e) => ({ label: e.label, score: typeof e.score === "number" ? e.score : Number(e.score) || 0 }));
+      .map((e) => {
+        const scoreNum = typeof e.score === "number" ? e.score : Number(e.score) || 0;
+        return { label: cleanLabel(e.label), score: scoreNum };
+      })
+      .filter((e) => e.label && e.score > MIN_EMOTION_SCORE);
+
+  if (Array.isArray(emotions)) {
+    return normalizeList(emotions);
   }
   if (emotions && typeof emotions === "object") {
     // handle {label,intensity,score,scores:{...}} or dict of label->score
     if (emotions.label && emotions.scores && typeof emotions.scores === "object") {
-      return Object.entries(emotions.scores).map(([label, score]) => ({ label, score: Number(score) || 0 }));
+      return normalizeList(Object.entries(emotions.scores).map(([label, score]) => ({ label, score })));
     }
-    return Object.entries(emotions).map(([label, score]) => ({ label, score: Number(score) || 0 }));
+    return normalizeList(Object.entries(emotions).map(([label, score]) => ({ label, score })));
   }
   return [];
 };
@@ -92,6 +108,61 @@ function bindModeToggle() {
   // single-mode (chat) – nothing to toggle
 }
 
+function bindCollapsibles() {
+  const toggles = document.querySelectorAll(".collapse-toggle");
+  toggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const targetId = toggle.dataset.target;
+      const panel = document.getElementById(targetId);
+      const section = toggle.closest(".collapsible");
+      if (!panel) return;
+      const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", (!isExpanded).toString());
+      toggle.textContent = isExpanded ? "Show" : "Hide";
+      panel.classList.toggle("collapsed", isExpanded);
+      section?.classList.toggle("collapsed", isExpanded);
+    });
+  });
+}
+
+const smoothScrollTo = (el, align = "start", yOffset = -12) => {
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const targetY = rect.top + window.scrollY + yOffset;
+  window.scrollTo({ top: targetY, behavior: "smooth" });
+};
+
+function bindNav() {
+  const buttons = document.querySelectorAll(".nav button");
+  const setActive = (btn) => {
+    buttons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+  };
+
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setActive(btn);
+      const target = btn.dataset.target;
+      if (target === "overview") {
+        smoothScrollTo(document.getElementById("overview-section"), "start", -20);
+        return;
+      }
+      if (target === "chat") {
+        smoothScrollTo(document.getElementById("chat-card"), "start", -12);
+        return;
+      }
+      if (target === "history") {
+        const feed = document.getElementById("session-feed");
+        smoothScrollTo(feed, "start", -12);
+        const oldest = document.querySelector("#messages .message:last-child");
+        if (oldest) {
+          setTimeout(() => smoothScrollTo(oldest, "end", -40), 160);
+        }
+      }
+    });
+  });
+}
+
 async function refreshSidebars() {
   const historyRes = await fetchHistory();
   if (historyRes.ok) {
@@ -115,6 +186,8 @@ async function init() {
   renderTips();
   bindModeToggle();
   bindForm();
+  bindNav();
+  bindCollapsibles();
   await refreshSidebars();
 }
 

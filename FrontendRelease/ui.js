@@ -3,6 +3,7 @@ import { CONFIG } from "./config.js";
 let chartInstance = null;
 let heatmapChart = null;
 let toastTimer = null;
+const MAX_POINTS = 5;
 
 const els = {
   modeLabel: () => document.getElementById("mode-label"),
@@ -132,17 +133,32 @@ export function renderStats(data) {
 }
 
 function normalizeEmotionScores(messages) {
-  const assistants = messages.filter((m) => m.role === "assistant" && Array.isArray(m.emotions) && m.emotions.length > 0);
-  const recent = assistants.slice(-12).reverse(); // newest first for labels (#1 ...)
+  const assistants = messages
+    .filter((m) => m.role === "assistant" && Array.isArray(m.emotions) && m.emotions.length > 0)
+    .map((m) => ({
+      ...m,
+      emotions: m.emotions.map((e) => ({
+        ...e,
+        label: e.label ? e.label.trim().charAt(0).toUpperCase() + e.label.trim().slice(1).toLowerCase() : "",
+      })),
+    }));
+  const recent = assistants.slice(-MAX_POINTS).reverse(); // newest first for labels (#1 ...)
   if (recent.length === 0) {
     return { labels: [], series: [], heatmap: { labels: [], emotions: [], recent: [] } };
   }
   const labels = recent.map((_, idx) => `#${idx + 1}`);
 
   // collect all emotion labels
-  const emotionSet = new Set();
-  recent.forEach((msg) => msg.emotions.forEach((e) => emotionSet.add(e.label || "Unknown")));
-  const emotions = Array.from(emotionSet);
+  const emotionMap = new Map();
+  recent.forEach((msg) =>
+    msg.emotions.forEach((e) => {
+      const key = (e.label || "Unknown").toLowerCase();
+      if (!emotionMap.has(key)) {
+        emotionMap.set(key, e.label || "Unknown");
+      }
+    }),
+  );
+  const emotions = Array.from(emotionMap.values());
 
   const series = emotions.map((emotion) => {
     const data = recent.map((msg) => {
@@ -217,8 +233,8 @@ function renderHeatmapGrid(heatmap) {
     return acc;
   }, {});
 
-  const columns = labels.length + 1;
-  let html = `<div class="heatmap-grid" style="grid-template-columns: repeat(${columns}, minmax(50px, 1fr));">`;
+  const widthStyle = `grid-template-columns: 120px repeat(${labels.length}, minmax(60px, 1fr));`;
+  let html = `<div class="heatmap-grid" style="${widthStyle}">`;
   html += '<div class="heatmap-cell heatmap-header"></div>';
   labels.forEach((label) => {
     html += `<div class="heatmap-cell heatmap-header">${label}</div>`;
