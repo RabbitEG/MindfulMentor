@@ -7,10 +7,13 @@ LlmGateway 是统一的大模型网关，屏蔽不同 provider（OpenAI 兼容�
 - Fallback：当前 provider 失败时自动切换到 mock，保证调用不致崩溃。
 
 ## 职责与结构
-- `Core.py`：加载配置，选择 provider，处理回退逻辑（失败时自动 fallback 到 mock）。
-- `Providers.py`：实现 Mock、TinyLocal（HF GPT-2 小模型）、OpenAI 兼容客户端。
-- `Config.py`：读取环境变量（`LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_API_MODEL/LLM_LOCAL_MODEL/LLM_TIMEOUT`）。
-- `Models.py`：定义 `GenerateRequest/GenerateResponse`。
+- `Core.py`：读取配置，选择 provider，失败时自动 fallback 到 `MockProvider` 并把错误写入 usage；会把 prompt/回复/usage 记录到 `.logs/llm-gateway.log`。
+- `Providers.py`：实现三类 Provider
+  - `MockProvider`：无依赖快速回包；token 计数基于分词数量。
+  - `TinyLocalProvider`：使用 HF `sshleifer/tiny-gpt2`（可被 `LLM_LOCAL_MODEL` 覆盖）在 CPU 生成，需安装 transformers/torch。
+  - `OpenAICompatibleProvider`：纯 httpx 客户端，通过 `LLM_API_KEY/LLM_BASE_URL/LLM_API_MODEL/LLM_TIMEOUT` 或请求覆盖参数调用 `/chat/completions`。
+- `Config.py`：读取环境变量（`LLM_PROVIDER/LLM_API_KEY/LLM_BASE_URL/LLM_API_MODEL/LLM_LOCAL_MODEL/LLM_TIMEOUT`），对 `openai|deepseek|api` 等 provider 自动补默认 base/model。
+- `Models.py`：定义 `GenerateRequest/GenerateResponse`，请求支持传入 max_tokens、provider 覆盖、临时 API key/base/model 覆盖。
 - `App.py`：FastAPI 入口，暴露 `/generate` 与 `/health`。
 
 ## 接口

@@ -4,13 +4,23 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 - 目标：作为一个 MVP，演示从“情绪输入”到“安全回复”的最小闭环，用户能得到共情回应、情绪可视化和简单练习建议。
 - 价值：快速验证情绪识别 + 安全提示 + 多 Provider 网关的组合思路，为后续接入真实 LLM、扩展安全策略或换模型提供支点。
 - 各模块意图：
-  - EmotionService：用零样本分类识别主情绪与强度，为下游决定安全等级。
-  - PromptEngine：按情绪强度切换模板/参数，确保高风险场景的提示更温和。
+  - EmotionService：用零样本分类识别主情绪与强度（1-4），为下游决定安全等级。
+  - PromptEngine：按情绪强度选择高/常规模板与 LLM 参数，确保高风险场景的提示更温和。
   - LlmGateway：解耦模型供应商（mock/本地/云端），失败时自动回退，便于在不同环境演示。
   - Orchestrator：串起安全检查、情绪、提示、生成，输出统一结构与 traceId，方便调试。
   - FrontendDeveloper：以可视化方式展示回复、情绪分布和建议练习，方便非技术同学体验 MVP。
   - FrontendRelease：纯静态版前端发布目录，用于打包/演示。
 - 使用场景示例：压力/焦虑自助对话、呼吸引导、思维澄清，附 traceId 便于调试与审计。
+
+## 仓库结构与角色
+- `EmotionService/`：独立 FastAPI 服务，`Core.py` 读入本地 HF 模型做零样本分类；`download_models.py` 预下载模型到 `.models/`，`App.py` 暴露 `/analyze`。
+- `PromptEngine/`：基于情绪强度挑选模板，`Templates/NormalIntensity.txt` 与 `HighIntensity.txt` 定义语气；`Core.py` 产出 `{prompt, mode, llmParams, meta}`；`App.py` 暴露 `/prompt`。
+- `LlmGateway/`：统一模型调用与回退，`Providers.py` 实现 mock/tiny-local/OpenAI 兼容调用，`Config.py` 读取 `.env`，`Core.py` 负责日志与 fallback，`App.py` 暴露 `/generate`。
+- `Orchestrator/`：业务编排层，`Safety.py` 做关键词阻断，`Flows.py` 串安全→情绪→提示→生成并写入 `.logs/orchestrator.log`，`App.py` 暴露 `/chat`。
+- `FrontendDeveloper/`：Streamlit 交互版（开发态），`App.py`/`Components/`/`Config.py` 构建 UI，便于快速调试。
+- `FrontendRelease/`：无需构建的静态版 UI，`index.html` + `app.js` + `ui.js` + `api.js` + `config.js` + `styles.css` 直接跑，包含 API 调用与 mock 回退。
+- `Docs/`：架构、接口等说明（`Arch.md`、`Interfaces.md`）。
+- `scripts/`：启动/清理脚本（`StartAll.sh` 自动生成 `.env`、安装依赖并启动多服务）。
 
 ## 快速开始
 - 前置：Python 3.10+，建议保持网络可下载依赖与模型。

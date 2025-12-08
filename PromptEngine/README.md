@@ -7,10 +7,10 @@ PromptEngine 负责根据情绪与上下文构建安全的 LLM Prompt，并决�
 - LLM 参数（llmParams）：调用大模型时的超参，如 `temperature`、`max_tokens`。
 
 ## 职责与结构
-- `Core.py`：读取模板（`Templates/`），根据 `PromptRequest` 生成 `PromptResponse`，包含 mode、llmParams、meta。
-- `Models.py`：定义请求/响应数据结构，约束强度范围等。
-- `App.py`：FastAPI 入口，暴露 `/prompt` 与 `/health`。
-- `Templates/`：按模式存放提示模板（如 high_intensity/normal）。
+- `Core.py`：读取 `Templates/NormalIntensity.txt` 或 `HighIntensity.txt`，强度 >3 时进入 `high_safety` 并使用更保守的 `DEFAULT_LLM_PARAMS`（温度 0.2 / 最大 256 tokens），否则走 `normal`（温度 0.4 / 最大 320 tokens）；会把 `context`/`emotion`/`intensity` 填充到模板并返回 `PromptResponse`（含模式、LLM 参数与模板名 meta）。
+- `Models.py`：定义 `PromptRequest/PromptResponse`，强度限制 1-4，llmParams 为 camelCase 键。
+- `App.py`：FastAPI 入口，暴露 `/prompt` 与 `/health`，方便 HTTP 方式复用。
+- `Templates/`：按模式存放提示模板，当前模板强调“同语言回应”“同伴口吻”，可增删占位符以携带更多上下文。
 
 ## 接口
 - `/prompt`：入参 `{label, intensity, user_text, context}`，出参 `{prompt, mode, llmParams, meta}`。
