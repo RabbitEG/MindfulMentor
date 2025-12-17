@@ -20,6 +20,7 @@ MindfulMentor 是一个“情绪觉察 + 安全回应”的轻量级多模块示
 - `FrontendDeveloper/`：Streamlit 交互版（开发态），`App.py`/`Components/`/`Config.py` 构建 UI，便于快速调试。
 - `FrontendRelease/`：无需构建的静态版 UI，`index.html` + `app.js` + `ui.js` + `api.js` + `config.js` + `styles.css` 直接跑，包含 API 调用与 mock 回退。
 - `Docs/`：架构、接口等说明（`Arch.md`、`Interfaces.md`）。
+- `example.md`：按 3 个焦虑等级整理的多轮示例会话输入（工作汇报场景），方便快速试跑与对照。
 - `scripts/`：启动/清理脚本（`StartAll.sh` 自动生成 `.env`、安装依赖并启动多服务）。
 
 ## 快速开始
