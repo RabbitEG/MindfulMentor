@@ -1,0 +1,50 @@
+@startuml ProcessFlow
+title Mindful Mentor Process Flow
+skinparam DefaultFontName Arial
+skinparam TitleFontName Arial
+skinparam TitleFontSize 26
+skinparam TitleFontStyle bold
+skinparam activityDiagramOrientation leftToRight
+skinparam backgroundColor transparent
+skinparam shadowing false
+
+
+start
+:User enters text in the front-end;
+:Front-end sends {text, sessionId, traceId} to Orchestrator;
+:Orchestrator verifies payload and headers;
+
+partition "Safety layer" {
+  :Call Safety service for keyword and policy checks;
+}
+
+if (Passes safety?) then (Yes)
+  partition "Emotion handling" {
+    :Call EmotionService;
+    :Receive {emotion, intensity, scores};
+  }
+  partition "Prompt generation" {
+    :Call PromptEngine;
+    :Receive {prompt, mode, llmParams, meta};
+  }
+  partition "LLM gateway" {
+    :Call LlmGateway;
+    :Receive {text, provider, usage};
+  }
+  :Orchestrator composes final reply with traceId;
+  :Front-end displays reply, emotion insights, and suggested exercises;
+else (No)
+  partition "Prompt generation" {
+    :Call PromptEngine (high_safety template);
+    :Receive {prompt, mode, llmParams, meta};
+  }
+  partition "LLM gateway" {
+    :Call LlmGateway;
+    :Receive {text, provider, usage};
+  }
+  :Orchestrator returns safe reply with traceId;
+  :Front-end displays safe reply;
+endif
+
+stop
+@enduml

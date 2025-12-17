@@ -1,0 +1,30 @@
+@startuml DataFlow
+title Mindful Mentor Dataflow
+skinparam DefaultFontName Arial
+skinparam TitleFontName Arial
+skinparam TitleFontSize 26
+skinparam TitleFontStyle bold
+
+actor User
+participant Frontend
+participant Orchestrator
+participant Safety
+participant EmotionService
+participant PromptEngine
+participant LlmGateway
+
+User -> Frontend : submit {text, sessionId}
+Frontend -> Orchestrator : POST /chat with {text, sessionId, traceId}
+Orchestrator -> Safety : validate {text, traceId}
+Safety --> Orchestrator : allow
+
+Orchestrator -> EmotionService : analyze {text, traceId}
+EmotionService --> Orchestrator : {emotion, intensity, scores}
+Orchestrator -> PromptEngine : build prompt {text, emotion, intensity, traceId}
+PromptEngine --> Orchestrator : {prompt, mode, llmParams, meta}
+Orchestrator -> LlmGateway : generate {prompt, params, provider}
+LlmGateway --> Orchestrator : {text, provider, usage}
+Orchestrator --> Frontend : {reply, emotion, mode, meta, traceId}
+
+Frontend --> User : render response and exercises
+@enduml
